@@ -125,7 +125,23 @@ class HackByteShell(cmd.Cmd):
             self.editor.freeze_direct(address, args[1])
         except ValueError:
             print("[-] Invalid index.")
-
+            
+    def do_script(self, path):
+        """Execute a HackByte script file (supports HackByte & bash commands)."""
+        if not os.path.isfile(path):
+            print(f"[-] Script file not found: {path}")
+            return
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("!"):  # Bash command
+                    os.system(line[1:])
+                else:  # HackByte command
+                    print(f"GG> {line}")
+                    self.onecmd(line)
+                
     def do_save(self, arg):
         "Save scan results: save <filename>"
         self.scanner.save_results(arg)
