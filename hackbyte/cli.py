@@ -89,42 +89,58 @@ class HackByteShell(cmd.Cmd):
 			print(f"[{i}] {hex(addr)} => {val}")
 
 	def do_edit(self, arg):
-		"Edit scan result values: edit <index|*> <value>"
-		if not self.editor or not self.scanner:
-			print("[-] Not yet attached to the process.")
+		"""Edit scanned memory value by index or * (edit all). Usage: edit <index|*> <new_value>"""
+		args = arg.strip().split()
+		if len(args) < 2:
+			print("Usage: edit <index|*> <new_value>")
 			return
-		args = arg.split()
-		if len(args) != 2:
-			print("Usage: edit <index|*> <value>")
+		if not self.scanner.results:
+			print("[-] No scan results found. Please scan first.")
 			return
-		target, value = args
-		if target == '*':
-			for address, _ in self.scanner.results:
-				self.editor.edit_direct(address, value)
-			print(f"[+] All results are set to {value}")
+	
+		index_or_all, new_val = args[0], args[1]
+		if index_or_all == '*':
+			for i, (addr, _) in enumerate(self.scanner.results):
+				self.mem_editor.write_value(self.pid, addr, new_val, self.scanner.last_type)
+				print(f"[+] Edited result {i} at {hex(addr)} → {new_val}")
 		else:
 			try:
-				index = int(target)
+				index = int(index_or_all)
+				if index >= len(self.scanner.results) or index < 0:
+					print(f"[-] Invalid index. Found {len(self.scanner.results)} result(s).")
+					return
 				address, _ = self.scanner.results[index]
-				self.editor.edit_direct(address, value)
+				self.mem_editor.write_value(self.pid, address, new_val, self.scanner.last_type)
+				print(f"[+] Edited address {hex(address)} → {new_val}")
 			except ValueError:
 				print("[-] Invalid index.")
 
 	def do_freeze(self, arg):
-		"Freeze values to keep them constant: freeze <index> <value>"
-		if not self.editor or not self.scanner:
-			print("[-] Not attached to the process yet.")
+		"""Freeze memory value by index or * (freeze all). Usage: freeze <index|*>"""
+		args = arg.strip().split()
+		if len(args) < 1:
+			print("Usage: freeze <index|*>")
 			return
-		args = arg.split()
-		if len(args) != 2:
-			print("Usage: freeze <index> <value>")
+		if not self.scanner.results:
+			print("[-] No scan results found. Please scan first.")
 			return
-		try:
-			index = int(args[0])
-			address, _ = self.scanner.results[index]
-			self.editor.freeze_direct(address, args[1])
-		except ValueError:
-			print("[-] Invalid index.")
+	
+		index_or_all = args[0]
+		if index_or_all == '*':
+			for i, (addr, _) in enumerate(self.scanner.results):
+				self.mem_editor.freeze_value(self.pid, addr, self.scanner.last_type)
+				print(f"[+] Freezing result {i} at {hex(addr)}")
+		else:
+			try:
+				index = int(index_or_all)
+				if index >= len(self.scanner.results) or index < 0:
+					print(f"[-] Invalid index. Found {len(self.scanner.results)} result(s).")
+					return
+				address, _ = self.scanner.results[index]
+				self.mem_editor.freeze_value(self.pid, address, self.scanner.last_type)
+				print(f"[+] Freezing address {hex(address)}")
+			except ValueError:
+				print("[-] Invalid index.")
 			
 	def do_script(self, path):
 		"""Execute a HackByte script file (supports HackByte & bash commands)."""
