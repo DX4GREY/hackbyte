@@ -1,3 +1,4 @@
+build/
 dist/
 hackbyte.egg-info/
 hackbyte/__pycache__/
