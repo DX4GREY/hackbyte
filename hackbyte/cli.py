@@ -3,20 +3,21 @@ from .scanner import MemoryScanner
 from .memeditor import MemoryEditor
 from .dummyproc import DummyProcess
 from .utils import list_processes, find_pid_by_name
+from hackbyte.info import get_process_info
 from .version import __version__
 
 class HackByteShell(cmd.Cmd):
 	
 	logo = f"""
-    __  __           __   ____        __     
+    __  __           __   ____        __	 
    / / / /___ ______/ /__/ __ )__  __/ /____ 
-  / /_/ / __ `/ ___/ //_/ __  / / / / __/ _ \\
+  / /_/ / __ `/ ___/ //_/ /_/ / / / / __/ _ \\
  / __  / /_/ / /__/ ,< / /_/ / /_/ / /_/  __/
 /_/ /_/\\__,_/\\___/_/|_/_____/\\__, /\\__/\\___/ 
       Maintained By Dx4Grey /____/ v{__version__}\n"""
 	intro = f"{logo}\nWelcome Hacker!! Type \"help\" or \"?\" for help."
 	prompt = f"{getpass.getuser()}@hackbyte> "
-
+	
 	def __init__(self):
 		super().__init__()
 		self.proc = None
@@ -176,7 +177,27 @@ class HackByteShell(cmd.Cmd):
 	def do_clear(self, arg):
 		"Clean all terminal outputs"
 		print("\033c", end="")
-
+		
+	def do_info(self, arg):
+		"""Show info about the currently attached process"""
+		if not self.proc:
+			print("[-] No process is currently attached.")
+			return
+	
+		info = get_process_info(self.proc)
+	
+		if 'error' in info:
+			print(f"[-] {info['error']}")
+		else:
+			print(f"[+] PID		: {info['pid']}")
+			print(f"[+] Name	: {info['name']}")
+			print(f"[+] Status	: {info['status']}")
+			print(f"[+] Uptime	: {info['uptime']:.1f} seconds")
+			print(f"[+] UID/GID	: {info['uid']} / {info['gid']}")
+			print(f"[+] Memory	: {info['memory']}")
+			print(f"[+] Threads	: {info['threads']}")
+			print(f"[+] Executable	: {info['exe']}")
+			
 	def do_exit(self, arg):
 		"Exit the program"
 		return True
