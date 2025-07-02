@@ -13,7 +13,7 @@ class HackByteShell(cmd.Cmd):
   / /_/ / __ `/ ___/ //_/ __  / / / / __/ _ \\
  / __  / /_/ / /__/ ,< / /_/ / /_/ / /_/  __/
 /_/ /_/\\__,_/\\___/_/|_/_____/\\__, /\\__/\\___/ 
-	  Maintained By Dx4Grey /____/ v{__version__}\n"""
+      Maintained By Dx4Grey /____/ v{__version__}\n"""
 	intro = f"{logo}\nWelcome Hacker!! Type \"help\" or \"?\" for help."
 	prompt = f"{getpass.getuser()}@hackbyte> "
 
