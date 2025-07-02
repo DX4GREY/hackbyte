@@ -26,11 +26,17 @@ class HackByteShell(cmd.Cmd):
 
 	def do_ls(self, arg):
 		"List of active processes: ls"
-		list_processes()
+		try:
+			list_processes()
+		except Exception as e:
+			print(f"[-] Failed to list processes: {e}")
 
 	def do_attach(self, pid_or_name):
 		"Attach to a process by PID or name: attach <pid|name>"
 		try:
+			if not pid_or_name:
+				print("Usage: attach <pid|name>")
+				return
 			if pid_or_name.isdigit():
 				pid = int(pid_or_name)
 			else:
@@ -42,12 +48,15 @@ class HackByteShell(cmd.Cmd):
 			self.scanner = MemoryScanner(pid)
 			self.editor = MemoryEditor(pid)
 			print(f"[+] Attached to PID {pid}")
-		except:
-			print("[-] Failed to attach. Invalid PID or name?")
+		except Exception as e:
+			print(f"[-] Failed to attach: {e}")
 
 	def do_kill(self, pid_or_name):
 		"Kill a process by PID or name: kill <pid|name>"
 		try:
+			if not pid_or_name:
+				print("Usage: kill <pid|name>")
+				return
 			pid = int(pid_or_name) if pid_or_name.isdigit() else find_pid_by_name(pid_or_name)
 			if pid is None:
 				print("[-] Process not found.")
@@ -67,7 +76,10 @@ class HackByteShell(cmd.Cmd):
 			print("Usage: scan <type> <value>")
 			return
 		type_, value = args[0], ' '.join(args[1:])
-		self.scanner.first_scan(type_, value)
+		try:
+			self.scanner.first_scan(type_, value)
+		except Exception as e:
+			print(f"[-] Scan failed: {e}")
 
 	def do_refine(self, arg):
 		"Refine scan results: refine <type> <value>"
@@ -79,125 +91,177 @@ class HackByteShell(cmd.Cmd):
 			print("Usage: refine <type> <value>")
 			return
 		type_, value = args[0], ' '.join(args[1:])
-		self.scanner.refine_scan(type_, value)
+		try:
+			self.scanner.refine_scan(type_, value)
+		except Exception as e:
+			print(f"[-] Refine failed: {e}")
 
 	def do_results(self, arg):
 		"Show last scan results: results"
-		if not self.scanner:
+		if not self.scanner or not self.scanner.results:
 			print("[-] No scan results yet.")
 			return
-		for i, (addr, val) in enumerate(self.scanner.results):
-			print(f"[{i}] {hex(addr)} => {val}")
+		try:
+			for i, (addr, val) in enumerate(self.scanner.results):
+				print(f"[{i}] {hex(addr)} => {val}")
+		except Exception as e:
+			print(f"[-] Failed to show results: {e}")
 
 	def do_edit(self, arg):
-		"""Edit scanned memory value by index or * (edit all). Usage: edit <index|*> <new_value>"""
+		"Edit memory value by index or *: edit <index|*> <new_value>"
 		args = arg.strip().split()
 		if len(args) < 2:
 			print("Usage: edit <index|*> <new_value>")
 			return
-		if not self.scanner.results:
-			print("[-] No scan results found. Please scan first.")
+		if not self.scanner or not self.scanner.results:
+			print("[-] No scan results found.")
 			return
-	
 		index_or_all, new_val = args[0], args[1]
-		if index_or_all == '*':
-			for i, (addr, _) in enumerate(self.scanner.results):
-				self.mem_editor.write_value(self.pid, addr, new_val, self.scanner.last_type)
-				print(f"[+] Edited result {i} at {hex(addr)} → {new_val}")
-		else:
-			try:
+		try:
+			if index_or_all == '*':
+				for i, (addr, _) in enumerate(self.scanner.results):
+					self.editor.edit_direct(addr, new_val)
+					print(f"[+] Edited result {i} at {hex(addr)} → {new_val}")
+			else:
 				index = int(index_or_all)
-				if index >= len(self.scanner.results) or index < 0:
+				if index < 0 or index >= len(self.scanner.results):
 					print(f"[-] Invalid index. Found {len(self.scanner.results)} result(s).")
 					return
-				address, _ = self.scanner.results[index]
-				self.mem_editor.write_value(self.pid, address, new_val, self.scanner.last_type)
-				print(f"[+] Edited address {hex(address)} → {new_val}")
-			except ValueError:
-				print("[-] Invalid index.")
+				addr, _ = self.scanner.results[index]
+				self.editor.edit_direct(addr, new_val)
+				print(f"[+] Edited address {hex(addr)} → {new_val}")
+		except Exception as e:
+			print(f"[-] Edit failed: {e}")
 
 	def do_freeze(self, arg):
-		"""Freeze memory value by index or * (freeze all). Usage: freeze <index|*>"""
+		"Freeze memory value by index or *: freeze <index|*>"
 		args = arg.strip().split()
 		if len(args) < 1:
 			print("Usage: freeze <index|*>")
 			return
-		if not self.scanner.results:
-			print("[-] No scan results found. Please scan first.")
+		if not self.scanner or not self.scanner.results:
+			print("[-] No scan results found.")
 			return
-	
 		index_or_all = args[0]
-		if index_or_all == '*':
-			for i, (addr, _) in enumerate(self.scanner.results):
-				self.mem_editor.freeze_value(self.pid, addr, self.scanner.last_type)
-				print(f"[+] Freezing result {i} at {hex(addr)}")
-		else:
-			try:
+		try:
+			if index_or_all == '*':
+				for i, (addr, val) in enumerate(self.scanner.results):
+					self.editor.freeze_direct(addr, val)
+					print(f"[+] Freezing result {i} at {hex(addr)}")
+			else:
 				index = int(index_or_all)
-				if index >= len(self.scanner.results) or index < 0:
+				if index < 0 or index >= len(self.scanner.results):
 					print(f"[-] Invalid index. Found {len(self.scanner.results)} result(s).")
 					return
-				address, _ = self.scanner.results[index]
-				self.mem_editor.freeze_value(self.pid, address, self.scanner.last_type)
-				print(f"[+] Freezing address {hex(address)}")
-			except ValueError:
-				print("[-] Invalid index.")
-			
+				addr, val = self.scanner.results[index]
+				self.editor.freeze_direct(addr, val)
+				print(f"[+] Freezing address {hex(addr)}")
+		except Exception as e:
+			print(f"[-] Freeze failed: {e}")
+
 	def do_script(self, path):
-		"""Execute a HackByte script file (supports HackByte & bash commands)."""
+		"Execute a HackByte script file (supports HackByte & bash commands)."
+		if not path:
+			print("Usage: script <file_path>")
+			return
 		if not os.path.isfile(path):
 			print(f"[-] Script file not found: {path}")
 			return
-		with open(path) as f:
-			for line in f:
-				line = line.strip()
-				if not line or line.startswith("#"):
-					continue
-				if line.startswith("!"):  # Bash command
-					os.system(line[1:])
-				else:  # HackByte command
-					print(f"{self.prompt}{line}")
-					self.onecmd(line)
-				
+		try:
+			with open(path) as f:
+				for line in f:
+					line = line.strip()
+					if not line or line.startswith("#"):
+						continue
+					if line.startswith("!"):
+						os.system(line[1:])
+					else:
+						print(f"{self.prompt}{line}")
+						self.onecmd(line)
+		except Exception as e:
+			print(f"[-] Failed to execute script: {e}")
+
 	def do_save(self, arg):
 		"Save scan results: save <filename>"
-		self.scanner.save_results(arg)
+		if not self.scanner or not self.scanner.results:
+			print("[-] No scan results to save.")
+			return
+		if not arg:
+			print("Usage: save <filename>")
+			return
+		try:
+			self.scanner.save_results(arg)
+		except Exception as e:
+			print(f"[-] Save failed: {e}")
 
 	def do_load(self, arg):
 		"Load scan results from file: load <filename>"
-		self.scanner.load_results(arg)
+		if not arg:
+			print("Usage: load <filename>")
+			return
+		try:
+			self.scanner.load_results(arg)
+		except Exception as e:
+			print(f"[-] Load failed: {e}")
 
 	def do_dummy(self, arg):
 		"Use dummy mode for testing without root"
-		self.proc = DummyProcess()
-		self.scanner = MemoryScanner(self.proc)
-		self.editor = MemoryEditor(self.proc)
-		print("[+] Dummy process is active for simulation.")
-		
+		try:
+			self.proc = DummyProcess()
+			self.scanner = MemoryScanner(self.proc)
+			self.editor = MemoryEditor(self.proc)
+			print("[+] Dummy process is active for simulation.")
+		except Exception as e:
+			print(f"[-] Failed to activate dummy mode: {e}")
+
 	def do_clear(self, arg):
-		"Clean all terminal outputs"
-		print("\033c", end="")
-		
+		"Clear terminal screen"
+		try:
+			print("c", end="")
+		except Exception as e:
+			print(f"[-] Failed to clear screen: {e}")
+
 	def do_info(self, arg):
-		"""Show info about the currently attached process"""
+		"Show info about the currently attached process"
 		if not self.proc:
 			print("[-] No process is currently attached.")
 			return
-	
-		info = get_process_info(self.proc)
-	
-		if 'error' in info:
-			print(f"[-] {info['error']}")
-		else:
-			print(f"[+] PID		: {info['pid']}")
-			print(f"[+] Name	: {info['name']}")
-			print(f"[+] Status	: {info['status']}")
-			print(f"[+] Uptime	: {info['uptime']:.1f} seconds")
-			print(f"[+] UID/GID	: {info['uid']} / {info['gid']}")
-			print(f"[+] Memory	: {info['memory']}")
-			print(f"[+] Threads	: {info['threads']}")
-			print(f"[+] Executable	: {info['exe']}")
-			
+		try:
+			info = get_process_info(self.proc)
+			if 'error' in info:
+				print(f"[-] {info['error']}")
+			else:
+				print(f"[+] PID		: {info['pid']}")
+				print(f"[+] Name	: {info['name']}")
+				print(f"[+] Status	: {info['status']}")
+				print(f"[+] Uptime	: {info['uptime']:.1f} seconds")
+				print(f"[+] UID/GID	: {info['uid']} / {info['gid']}")
+				print(f"[+] Memory	: {info['memory']}")
+				print(f"[+] Threads	: {info['threads']}")
+				print(f"[+] Executable	: {info['exe']}")
+		except Exception as e:
+			print(f"[-] Failed to get process info: {e}")
+
+	def do_fuzzy(self, arg):
+		"Fuzzy memory search: fuzzy start <type> | fuzzy increased | fuzzy decreased"
+		args = arg.strip().split()
+		if not self.scanner:
+			print("[-] Not attached to any process.")
+			return
+		if not args:
+			print("Usage: fuzzy start <type> | fuzzy increased | fuzzy decreased")
+			return
+		try:
+			if args[0] == "start" and len(args) == 2:
+				self.scanner.fuzzy_start(args[1])
+			elif args[0] in ["increased", "decreased"]:
+				self.scanner.fuzzy_filter(args[0])
+			else:
+				print("Invalid fuzzy command.")
+		except Exception as e:
+			print(f"[-] Fuzzy search failed: {e}")
+
 	def do_exit(self, arg):
 		"Exit the program"
+		print("[*] Exiting...")
 		return True

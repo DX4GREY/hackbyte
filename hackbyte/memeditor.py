@@ -11,7 +11,6 @@ class MemoryEditor:
 	def edit_direct(self, address, new_value):
 		val = parse_value('dword', new_value)  # default dword
 		write_memory(self.pid, address, val)
-		print(f"[+] Nilai di {hex(address)} diubah ke {new_value}")
 
 	def freeze_direct(self, address, value):
 		val = parse_value('dword', value)
@@ -23,5 +22,3 @@ class MemoryEditor:
 			for addr, val in self.freezes:
 				write_memory(self.pid, addr, val)
 			time.sleep(0.5)
-
-
