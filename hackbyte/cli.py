@@ -139,7 +139,7 @@ class HackByteShell(cmd.Cmd):
                 if line.startswith("!"):  # Bash command
                     os.system(line[1:])
                 else:  # HackByte command
-                    print(f"{prompt}{line}")
+                    print(f"{self.prompt}{line}")
                     self.onecmd(line)
                 
     def do_save(self, arg):
