@@ -1,4 +1,4 @@
-from .ansi import Fore, Back, Style, rgb_fore, rgb_back
+from ansi import Fore, Back, Style, rgb_fore, rgb_back
 
 def print_attrs(cls, label):
     print(Style.BOLD + f"\n=== {label} ===" + Style.RESET)
