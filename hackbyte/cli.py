@@ -9,16 +9,16 @@ from .version import __version__
 from .ansi_colors import Fore as F, Style as S
 
 class HackByteShell(cmd.Cmd):
-	user_str = (F.BRIGHT_RED if getpass.getuser() == "root" else F.BLUE) + getpass.getuser() + S.RESET
+	user_str = (F.BRIGHT_RED if getpass.getuser() == "root" else F.BLUE) + getpass.getuser()
 	logo = f"""
-    __  __           __   ____        __	 
+{S.BOLD}{F.RED}    __  __           __   ____        __	 
    / / / /___ ______/ /__/ __ )__  __/ /____ 
   / /_/ / __ `/ ___/ //_/ /_/ / / / / __/ _ \\
- / __  / /_/ / /__/ ,< / /_/ / /_/ / /_/  __/
+{F.WHITE} / __  / /_/ / /__/ ,< / /_/ / /_/ / /_/  __/
 /_/ /_/\\__,_/\\___/_/|_/_____/\\__, /\\__/\\___/ 
-      Maintained By Dx4Grey /____/ v{__version__}\n"""
+      {S.RESET}Maintained By {S.BOLD}Dx4Grey{S.BOLD} /____/{S.RESET} v{S.BOLD}{__version__}{S.RESET}\n"""
 	intro = f"{logo}\nWelcome Hacker!! Type \"help\" or \"?\" for help."
-	prompt = f"{user_str}@hackbyte> "
+	prompt = f"{user_str}@hackbyte{S.RESET}> "
 	
 	def __init__(self):
 		super().__init__()
@@ -262,7 +262,29 @@ class HackByteShell(cmd.Cmd):
 				LOG.error("Invalid fuzzy command.")
 		except Exception as e:
 			LOG.error(f"Fuzzy search failed: {e}")
-
+			
+	def do_help(self, arg):
+		from .logs import info_plus, warn
+		info_plus("Available Commands:")
+	
+		commands = sorted(
+			(cmd[3:], getattr(self, cmd).__doc__ or "No description")
+			for cmd in dir(self) if cmd.startswith("do_")
+		)
+	
+		for name, doc in commands:
+			first_line = doc.strip().splitlines()[0] if doc else ""
+			print(f"  {name:<10} {first_line}")
+	
+		if arg:
+			print()
+			cmd_func = getattr(self, f"do_{arg}", None)
+			if cmd_func and cmd_func.__doc__:
+				info_plus(f"Help for command '{arg}':")
+				print(f"{S.RESET}{cmd_func.__doc__}")
+			else:
+				warn(f"No help available for '{arg}'")
+				
 	def do_exit(self, arg):
 		"Exit the program"
 		LOG.info("Exiting...")
