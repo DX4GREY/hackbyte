@@ -1,4 +1,5 @@
-import os, .logs as LOG
+import os, 
+from . import logs as LOG
 
 def read_memory_regions(pid):
 	maps = f"/proc/{pid}/maps"
