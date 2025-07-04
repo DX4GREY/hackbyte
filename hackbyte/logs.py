@@ -1,16 +1,16 @@
 from .ansi_colors import Fore as F, Style as S
 
 def success(msg):
-	print(f"{F.GREEN}[+] {msg}{S.RESET}")
+	print(f"{F.GREEN}[+] {S.RESET}{msg}")
 
 def error(msg):
-	print(f"{F.RED}[-] {msg}{S.RESET}")
+	print(f"{F.RED}[-] {S.RESET}{msg}")
 
 def warn(msg):
-	print(f"{F.YELLOW}[!] {msg}{S.RESET}")
+	print(f"{F.YELLOW}[!] {S.RESET}{msg}")
 
 def info(msg):
-	print(f"{F.CYAN}[i] {msg}{S.RESET}")
+	print(f"{F.CYAN}[i] {S.RESET}{msg}")
 
 def custom(tag, msg, color):
 	"""
@@ -18,4 +18,4 @@ def custom(tag, msg, color):
 	msg: the message string
 	color: ansi_colors.Fore color (e.g. F.MAGENTA)
 	"""
-	print(f"{color}[{tag}] {msg}{S.RESET}")
+	print(f"{color}[{tag}] {S.RESET}{msg}")
