@@ -1,4 +1,17 @@
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Bytecode in specific modules
+hackbyte/__pycache__/
+ansi_colors/__pycache__/
+
+# Build artifacts
 build/
 dist/
 hackbyte.egg-info/
-hackbyte/__pycache__/
+
+# IDE/editor configs (optional)
+.vscode/
+.DS_Store
