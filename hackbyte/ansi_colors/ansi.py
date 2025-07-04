@@ -7,3 +7,13 @@ class Foreground:
     MAGENTA = '\033[35m'
     CYAN    = '\033[36m'
     WHITE   = '\033[37m'
+    
+class Background:
+    BLACK   = '\033[40m'
+    RED     = '\033[41m'
+    GREEN   = '\033[42m'
+    YELLOW  = '\033[43m'
+    BLUE    = '\033[44m'
+    MAGENTA = '\033[45m'
+    CYAN    = '\033[46m'
+    WHITE   = '\033[47m'
