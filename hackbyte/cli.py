@@ -1,4 +1,5 @@
-import cmd, getpass, os, .logs as LOG
+import cmd, getpass, os
+from . import logs as LOG
 from .scanner import MemoryScanner
 from .memeditor import MemoryEditor
 from .dummyproc import DummyProcess
