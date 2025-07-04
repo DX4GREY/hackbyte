@@ -219,7 +219,7 @@ class HackByteShell(cmd.Cmd):
 	def do_clear(self, arg):
 		"Clear terminal screen"
 		try:
-			LOG.info("c", end="")
+			print("c", end="")
 		except Exception as e:
 			LOG.error(f"Failed to clear screen: {e}")
 
