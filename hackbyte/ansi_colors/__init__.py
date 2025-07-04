@@ -1,1 +1,1 @@
-from .ansi import Foreground, Background, Style, rgb_fore, rgb_back
+from .ansi import Fore, Back, Style, rgb_fore, rgb_back
