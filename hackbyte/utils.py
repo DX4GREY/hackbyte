@@ -1,4 +1,4 @@
-import os
+import os, .logs as LOG
 
 def read_memory_regions(pid):
 	maps = f"/proc/{pid}/maps"
@@ -13,7 +13,7 @@ def read_memory_regions(pid):
 				start, end = [int(x, 16) for x in addr.split('-')]
 				regions.append((start, end))
 	except Exception as e:
-		print(f"[-] Failed to read maps: {e}")
+		LOG.error(f"Failed to read maps: {e}")
 	return regions
 
 def list_processes():
