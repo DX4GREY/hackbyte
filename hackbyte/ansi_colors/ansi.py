@@ -1,4 +1,4 @@
-class Foreground:
+class Fore:
     BLACK   = '\033[30m'
     RED     = '\033[31m'
     GREEN   = '\033[32m'
@@ -8,7 +8,7 @@ class Foreground:
     CYAN    = '\033[36m'
     WHITE   = '\033[37m'
     
-class Background:
+class Back:
     BLACK   = '\033[40m'
     RED     = '\033[41m'
     GREEN   = '\033[42m'
