@@ -1,4 +1,5 @@
+import .logs as LOG
 class DummyProcess:
 	def __init__(self):
 		self.pid = 9999
-		print("[!] This is dummy mode. No real processes are used.")
+		LOG.warn("This is dummy mode. No real processes are used.")
