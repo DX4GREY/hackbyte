@@ -1,4 +1,4 @@
-import os, 
+import os
 from . import logs as LOG
 
 def read_memory_regions(pid):
