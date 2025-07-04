@@ -1,4 +1,5 @@
-import json, .logs as LOG
+import json
+from . import logs as LOG
 from .valuetypes import parse_value, parse_value_type
 from .utils import read_memory_regions, scan_memory, read_memory_value
 
