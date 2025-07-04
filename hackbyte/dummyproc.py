@@ -1,4 +1,4 @@
-import .logs as LOG
+from . import logs as LOG
 class DummyProcess:
 	def __init__(self):
 		self.pid = 9999
