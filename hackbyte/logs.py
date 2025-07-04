@@ -12,6 +12,10 @@ def warn(msg):
 def info(msg):
 	print(f"{F.CYAN}[i] {S.RESET}{msg}")
 
+def info_plus(msg):
+	"""Info with [+] tag in blue (not green)."""
+	print(f"{F.BLUE}[+] {S.RESET}{msg}")
+
 def custom(tag, msg, color):
 	"""
 	tag: string like 'DEBUG', 'NOTE', etc.
