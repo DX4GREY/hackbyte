@@ -264,26 +264,25 @@ class HackByteShell(cmd.Cmd):
 			LOG.error(f"Fuzzy search failed: {e}")
 			
 	def do_help(self, arg):
-		from .logs import info_plus, warn
-		info_plus("Available Commands:")
-	
-		commands = sorted(
-			(cmd[3:], getattr(self, cmd).__doc__ or "No description")
-			for cmd in dir(self) if cmd.startswith("do_")
-		)
-	
-		for name, doc in commands:
-			first_line = doc.strip().splitlines()[0] if doc else ""
-			print(f"  {name:<10} {first_line}")
-	
 		if arg:
 			print()
 			cmd_func = getattr(self, f"do_{arg}", None)
 			if cmd_func and cmd_func.__doc__:
-				info_plus(f"Help for command '{arg}':")
+				LOG.info_plus(f"Help for command '{arg}':")
 				print(f"{S.RESET}{cmd_func.__doc__}")
 			else:
-				warn(f"No help available for '{arg}'")
+				LOG.warn(f"No help available for '{arg}'")
+		else:
+			LOG.info_plus("Available Commands:")
+		
+			commands = sorted(
+				(cmd[3:], getattr(self, cmd).__doc__ or "No description")
+				for cmd in dir(self) if cmd.startswith("do_")
+			)
+		
+			for name, doc in commands:
+				first_line = doc.strip().splitlines()[0] if doc else ""
+				print(f"  {name:<10} {first_line}")
 				
 	def do_exit(self, arg):
 		"Exit the program"
