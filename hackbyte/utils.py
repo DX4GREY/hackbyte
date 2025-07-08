@@ -17,13 +17,15 @@ def read_memory_regions(pid):
 		LOG.error(f"Failed to read maps: {e}")
 	return regions
 
-def list_processes():
+def list_processes(keyword=None):
 	print("PID\tNAME")
 	for pid in filter(str.isdigit, os.listdir("/proc")):
 		try:
 			with open(f"/proc/{pid}/cmdline", 'r') as f:
 				name = f.read().strip().replace('\0', ' ')
-				if name:
+				if not name:
+					continue
+				if keyword is None or keyword.lower() in name.lower():
 					print(f"{pid}\t{name}")
 		except:
 			continue
