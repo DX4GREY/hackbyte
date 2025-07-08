@@ -27,9 +27,10 @@ class HackByteShell(cmd.Cmd):
 		self.editor = None
 
 	def do_ls(self, arg):
-		"List of active processes: ls"
+		"""List active processes. Usage: ls [keyword]"""
 		try:
-			list_processes()
+			keyword = arg.strip() if arg else None
+			list_processes(keyword)
 		except Exception as e:
 			LOG.error(f"Failed to list processes: {e}")
 
